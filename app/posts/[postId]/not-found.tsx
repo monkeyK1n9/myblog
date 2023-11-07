@@ -1,9 +1,10 @@
-import React from 'react'
+import Link from "next/link";
 
 export default function NotFound() {
     return (
-        <h1 className="text-3xl font-bold text-white grid place-content-center mb-2 mt-10 md:mb-0">
-            Oops! The requested post does not exist.
-        </h1>
+        <div className="text-center">
+            <p className="mt-10">Sorry, the requested post does not exist.</p>
+            <Link href="/">⬅ Back to home</Link>
+        </div>
     )
 }

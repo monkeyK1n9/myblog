@@ -1,32 +1,32 @@
-import { getPostData, getSortedPostsData } from '@/lib/posts'
+import { getPostByName } from '@/lib/posts'
 import React from 'react'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import getFormattedDate from '@/lib/getFormattedDate'
 import Link from 'next/link'
 
-type Post = {
-    postId: string
-}
+
 
 type Props = {
-    params: Post
+    params: {
+        postId: string
+    }
 }
 
-export function generateStaticParams() {
-    const posts = getSortedPostsData(); //deduped, so don't worry
+export const revalidate = 0;
 
-    return posts.map(post => ({
-        postId: post.id
-    }))
-}
+// export async function generateStaticParams() {
+//     const posts = await getPostsMeta(); //deduped, so don't worry
 
-export function generateMetadata({params}: Props): Metadata {
-    const posts = getSortedPostsData(); //deduped, so don't worry
+//     if (!posts) return []; //we return empty array to solve the empty params if posts is undefined
 
-    const {postId} = params;
+//     return posts.map(post => ({
+//         postId: post.id
+//     }))
+// }
 
-    const post = posts.find(post => post.id === postId);
+export async function generateMetadata({params: { postId }}: Props) {
+    const post = await getPostByName(`${postId}.mdx`);
 
     if (!post) {
         return {
@@ -36,34 +36,44 @@ export function generateMetadata({params}: Props): Metadata {
     }
 
     return {
-        title: post.title,
-        description: "Blog post written on: " + post.date
+        title: post.meta.title,
+        description: "Blog post written on: " + post.meta.date
     }
 }
 
-export default async function Post({params}: Props) {
-    const posts = getSortedPostsData(); //deduped, so don't worry
+export default async function Post({params: { postId }}: Props) {
+    const post = await getPostByName(`${postId}.mdx`); //deduped, so don't worry
 
-    const {postId} = params;
+    if (!post) notFound(); //returns not found page if the post id is not valid
 
-    if (!posts.find(post => post.id === postId)) notFound(); //returns not found page if the post id is not valid
+    const {meta, content} = post
 
-    const {title, date, contentHTML} = await getPostData(postId);
+    const pubDate = getFormattedDate(meta.date);
 
-    const pubDate = getFormattedDate(date);
+    const tags = meta.tags.map((tag, index) => (
+        <Link key={index} href={`/tags/${tag}`}>{tag}</Link>
+    ))
 
     return (
-        <main className='px-6 prose prose-xl prose-slate dark:prose-invert mx-auto'>
-            <h1 className='text-3xl mt-4 mb-0'>{title}</h1>
-            <p className='mt-0'>
+        <>
+            <h2 className='text-3xl mt-4 mx-0'>{meta.title}</h2>
+            <p className='mt-0 text-sm'>
                 {pubDate}
             </p>
             <article>
-                <section dangerouslySetInnerHTML={{ __html: contentHTML}}/>
-                <p>
-                    <Link href={"/"}>⬅ Back to home</Link>
-                </p>
+                {content}
             </article>
-        </main>
+            <section>
+                <h3>
+                    Related:
+                </h3>
+                <div className='flex flex-row gap-4'>
+                    {tags}
+                </div>
+            </section>
+            <p className='mb-10'>
+                <Link href="/">⬅ Back to home</Link>
+            </p>
+        </>
     )
 }
