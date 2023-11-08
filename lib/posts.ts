@@ -1,4 +1,7 @@
 import { compileMDX } from "next-mdx-remote/rsc";
+import rehypeAutolinkHedaings from 'rehype-autolink-headings';
+import rehypeHighlight from 'rehype-highlight'
+import rehypeSlug from 'rehype-slug';
 
 type FileTree = {
     tree: [
@@ -21,7 +24,10 @@ export async function getPostsMeta(): Promise<Meta[] | undefined> {
 
     const repoFileTree: FileTree = await res.json();
 
-    const filesArray = repoFileTree.tree.map(obj => obj.path).filter(path => path.endsWith(".mdx"))
+    const filesArray = repoFileTree.tree
+        .map(obj => obj.path)
+        .filter(path => path.endsWith(".mdx"))
+        .map(obj => obj.split("/")[1])
 
     let posts: Meta[] = [];
 
@@ -37,7 +43,7 @@ export async function getPostsMeta(): Promise<Meta[] | undefined> {
 }
 
 export async function getPostByName(fileName: string): Promise<BlogPost | undefined> {
-    const res = await fetch(`https://raw.githubusercontent.com/monkeyK1n9/blogs/main/${fileName}`, {
+    const res = await fetch(`https://raw.githubusercontent.com/monkeyK1n9/blogs/main/posts/${fileName}`, {
         headers: {
             Accept: 'application/vnd.github+json',
             Authorization: 'Bearer ' + process.env.GITHUB_TOKEN,
@@ -54,7 +60,17 @@ export async function getPostByName(fileName: string): Promise<BlogPost | undefi
     const { frontmatter, content } = await compileMDX<{title: string, date: string, tags: string[]}>({
         source: rawMDX,
         options: {
-            parseFrontmatter: true
+            parseFrontmatter: true,
+            mdxOptions: {
+                rehypePlugins: [
+                    rehypeSlug,
+                    //@ts-ignore
+                    rehypeHighlight,
+                    [rehypeAutolinkHedaings, {
+                        behavior: 'wrap'
+                    }]
+                ]
+            }
         }
     })
 

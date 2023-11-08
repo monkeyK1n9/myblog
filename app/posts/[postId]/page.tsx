@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import getFormattedDate from '@/lib/getFormattedDate'
 import Link from 'next/link'
-
+import 'highlight.js/styles/github-dark.css'
 
 
 type Props = {
@@ -43,14 +43,14 @@ export async function generateMetadata({params: { postId }}: Props) {
 
 export default async function Post({params: { postId }}: Props) {
     const post = await getPostByName(`${postId}.mdx`); //deduped, so don't worry
-
+    
     if (!post) notFound(); //returns not found page if the post id is not valid
 
     const {meta, content} = post
 
     const pubDate = getFormattedDate(meta.date);
 
-    const tags = meta.tags.map((tag, index) => (
+    const tags = meta.tags?.map((tag, index) => (
         <Link key={index} href={`/tags/${tag}`}>{tag}</Link>
     ))
 
