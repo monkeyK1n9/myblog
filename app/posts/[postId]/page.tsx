@@ -13,17 +13,17 @@ type Props = {
     }
 }
 
-export const revalidate = 0;
+export const revalidate = 10;
 
-// export async function generateStaticParams() {
-//     const posts = await getPostsMeta(); //deduped, so don't worry
+export async function generateStaticParams() {
+    const posts = await getPostsMeta(); //deduped, so don't worry
 
-//     if (!posts) return []; //we return empty array to solve the empty params if posts is undefined
+    if (!posts) return []; //we return empty array to solve the empty params if posts is undefined
 
-//     return posts.map(post => ({
-//         postId: post.id
-//     }))
-// }
+    return posts.map(post => ({
+        postId: post.id
+    }))
+}
 
 export async function generateMetadata({params: { postId }}: Props) {
     const post = await getPostByName(`${postId}.mdx`);
