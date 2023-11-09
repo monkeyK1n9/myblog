@@ -1,4 +1,4 @@
-import { getPostByName } from '@/lib/posts'
+import { getPostByName, getPostsMeta } from '@/lib/posts'
 import React from 'react'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
