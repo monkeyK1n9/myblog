@@ -3,6 +3,7 @@ import rehypeAutolinkHedaings from 'rehype-autolink-headings';
 import rehypeHighlight from 'rehype-highlight'
 import rehypeSlug from 'rehype-slug';
 import Video from "@/app/components/Video";
+import CustomImage from "@/app/components/CustomImage";
 
 type FileTree = {
     tree: [
@@ -61,7 +62,8 @@ export async function getPostByName(fileName: string): Promise<BlogPost | undefi
     const { frontmatter, content } = await compileMDX<{title: string, date: string, tags: string[]}>({
         source: rawMDX,
         components: { // here we can add components to be used in the mdx files when rendered
-            Video
+            Video,
+            CustomImage,
         },
         options: {
             parseFrontmatter: true,
